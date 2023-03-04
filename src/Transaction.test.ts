@@ -3,17 +3,17 @@ import {
   isReady,
   shutdown,
   Mina,
-  PrivateKey,
-  PublicKey,
-  Account,
-  AccountUpdate,
+  //PrivateKey,
+  //PublicKey,
+  //Account,
+  //AccountUpdate,
   UInt64,
 } from 'snarkyjs';
 
 let proofsEnabled = true;
 
 describe('Transactions', () => {
-  let deployerAccount: PublicKey, deployerKey: PrivateKey;
+  //let deployerAccount: PublicKey, deployerKey: PrivateKey;
   //senderAccount: PublicKey,
   //senderKey: PrivateKey,
   //zkAppAddress: PublicKey,
@@ -26,8 +26,8 @@ describe('Transactions', () => {
   beforeEach(() => {
     const Local = Mina.LocalBlockchain({ proofsEnabled });
     Mina.setActiveInstance(Local);
-    ({ privateKey: deployerKey, publicKey: deployerAccount } =
-      Local.testAccounts[0]);
+    //({ privateKey: deployerKey, publicKey: deployerAccount } =
+    //  Local.testAccounts[0]);
     //    ({ privateKey: senderKey, publicKey: senderAccount } =
     //      Local.testAccounts[1]);
     //zkAppPrivateKey = PrivateKey.random();
@@ -51,7 +51,7 @@ describe('Transactions', () => {
   //    console.log(`deployer account initialized with ${Account(deployerAccount).balance} mina`)
   //  }
 
-  it('should start', async () => {
+  it('Transaction Operations', async () => {
     //    await localDeploy();
     // [x / y] + [y / x] == identity()
     //expect(Account(deployerAccount).balance.assertEquals(new UInt64(0)))
@@ -63,6 +63,13 @@ describe('Transactions', () => {
       debit: new UInt64(10),
       credit: new UInt64(30),
     });
+    expect(Transaction.inv(initial)).toEqual(
+      new Transaction({ debit: new UInt64(40), credit: new UInt64(100) })
+    );
+    expect(Transaction.iden()).toEqual(
+      new Transaction({ debit: new UInt64(0), credit: new UInt64(0) })
+    );
+
     console.log(Transaction.add(initial, update));
   });
   it.todo('should be correct');
