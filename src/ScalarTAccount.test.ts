@@ -1,4 +1,4 @@
-import { ScalarTAccount } from './Transaction';
+import { ScalarTAccount } from './ScalarTAccount';
 import { UInt64, Mina, isReady, shutdown } from 'snarkyjs';
 
 describe('ScalarTAccount is a Group', () => {
