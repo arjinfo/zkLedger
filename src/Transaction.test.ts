@@ -1,76 +1,69 @@
-import { Transaction } from './Transaction';
-import {
-  isReady,
-  shutdown,
-  Mina,
-  //PrivateKey,
-  //PublicKey,
-  //Account,
-  //AccountUpdate,
-  UInt64,
-} from 'snarkyjs';
+import { ScalarTAccount } from './Transaction';
+import { UInt64, Mina, isReady, shutdown } from 'snarkyjs';
 
-let proofsEnabled = true;
-
-describe('Transactions', () => {
-  //let deployerAccount: PublicKey, deployerKey: PrivateKey;
-  //senderAccount: PublicKey,
-  //senderKey: PrivateKey,
-  //zkAppAddress: PublicKey,
-  //zkAppPrivateKey: PrivateKey
-
+describe('ScalarTAccount is a Group', () => {
   beforeAll(async () => {
     await isReady;
-  });
-
-  beforeEach(() => {
-    const Local = Mina.LocalBlockchain({ proofsEnabled });
+    let Local = Mina.LocalBlockchain();
     Mina.setActiveInstance(Local);
-    //({ privateKey: deployerKey, publicKey: deployerAccount } =
-    //  Local.testAccounts[0]);
-    //    ({ privateKey: senderKey, publicKey: senderAccount } =
-    //      Local.testAccounts[1]);
-    //zkAppPrivateKey = PrivateKey.random();
-    //zkAppAddress = zkAppPrivateKey.toPublicKey();
   });
-
-  afterAll(() => {
-    // `shutdown()` internally calls `process.exit()` which will exit the running Jest process early.
-    // Specifying a timeout of 0 is a workaround to defer `shutdown()` until Jest is done running all tests.
-    // This should be fixed with https://github.com/MinaProtocol/mina/issues/10943
+  afterAll(async () => {
     setTimeout(shutdown, 0);
   });
 
-  //  async function localDeploy() {
-  //    const txn = await Mina.transaction(deployerAccount, () => {
-  //      AccountUpdate.fundNewAccount(deployerAccount);
-  //    });
-  //    await txn.prove();
-  //    // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
-  //    // await txn.sign([deployerKey, zkAppPrivateKey]).send();
-  //    console.log(`deployer account initialized with ${Account(deployerAccount).balance} mina`)
-  //  }
-
-  it('Transaction Operations', async () => {
-    //    await localDeploy();
-    // [x / y] + [y / x] == identity()
-    //expect(Account(deployerAccount).balance.assertEquals(new UInt64(0)))
-    let initial = new Transaction({
-      debit: new UInt64(100),
-      credit: new UInt64(40),
+  const mkTransaction = (dbt: number, crd: number) => {
+    return new ScalarTAccount({
+      debit: UInt64.from(dbt),
+      credit: UInt64.from(crd),
     });
-    let update = new Transaction({
-      debit: new UInt64(10),
-      credit: new UInt64(30),
-    });
-    expect(Transaction.inv(initial)).toEqual(
-      new Transaction({ debit: new UInt64(40), credit: new UInt64(100) })
-    );
-    expect(Transaction.iden()).toEqual(
-      new Transaction({ debit: new UInt64(0), credit: new UInt64(0) })
-    );
+  };
 
-    console.log(Transaction.add(initial, update));
+  const randInt = Math.floor(Math.random() * 10000);
+  const [a, b, c, d, e, f] = Array(6).fill(randInt);
+
+  it('Additive Closure', async () => {
+    let x = mkTransaction(a, b),
+      y = mkTransaction(c, d);
+
+    expect(ScalarTAccount.add(x, y)).toEqual(mkTransaction(a + c, b + d));
   });
-  it.todo('should be correct');
+
+  it('Associative', async () => {
+    let x = mkTransaction(a, b),
+      y = mkTransaction(c, d),
+      z = mkTransaction(e, f);
+
+    expect(ScalarTAccount.add(ScalarTAccount.add(x, y), z)).toEqual(
+      ScalarTAccount.add(x, ScalarTAccount.add(y, z))
+    );
+  });
+
+  it('Abelian', async () => {
+    let x = mkTransaction(a, b),
+      y = mkTransaction(c, d);
+
+    expect(ScalarTAccount.add(x, y)).toEqual(ScalarTAccount.add(y, x));
+  });
+
+  it('Identity', async () => {
+    let x = mkTransaction(a, b);
+
+    expect(ScalarTAccount.add(x, ScalarTAccount.iden())).toEqual(x);
+  });
+
+  it('Inverse', async () => {
+    let x = mkTransaction(a, b);
+
+    expect(
+      ScalarTAccount.min(ScalarTAccount.add(x, ScalarTAccount.inv(x)))
+    ).toEqual(ScalarTAccount.iden());
+  });
+
+  it('Reduced Form', async () => {
+    let [dbt, crd] = a < b ? [0, b - a] : [a - b, 0];
+
+    expect(ScalarTAccount.min(mkTransaction(a, b))).toEqual(
+      mkTransaction(dbt, crd)
+    );
+  });
 });
