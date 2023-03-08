@@ -11,7 +11,7 @@ describe('ScalarTAccount is a Group', () => {
     setTimeout(shutdown, 0);
   });
 
-  const mkTransaction = (dbt: number, crd: number) => {
+  const mkScalarTAccount = (dbt: number, crd: number) => {
     return new ScalarTAccount({
       debit: UInt64.from(dbt),
       credit: UInt64.from(crd),
@@ -22,16 +22,16 @@ describe('ScalarTAccount is a Group', () => {
   const [a, b, c, d, e, f] = Array(6).fill(randInt);
 
   it('Additive Closure', async () => {
-    let x = mkTransaction(a, b),
-      y = mkTransaction(c, d);
+    let x = mkScalarTAccount(a, b),
+      y = mkScalarTAccount(c, d);
 
-    expect(ScalarTAccount.add(x, y)).toEqual(mkTransaction(a + c, b + d));
+    expect(ScalarTAccount.add(x, y)).toEqual(mkScalarTAccount(a + c, b + d));
   });
 
   it('Associative', async () => {
-    let x = mkTransaction(a, b),
-      y = mkTransaction(c, d),
-      z = mkTransaction(e, f);
+    let x = mkScalarTAccount(a, b),
+      y = mkScalarTAccount(c, d),
+      z = mkScalarTAccount(e, f);
 
     expect(ScalarTAccount.add(ScalarTAccount.add(x, y), z)).toEqual(
       ScalarTAccount.add(x, ScalarTAccount.add(y, z))
@@ -39,20 +39,20 @@ describe('ScalarTAccount is a Group', () => {
   });
 
   it('Abelian', async () => {
-    let x = mkTransaction(a, b),
-      y = mkTransaction(c, d);
+    let x = mkScalarTAccount(a, b),
+      y = mkScalarTAccount(c, d);
 
     expect(ScalarTAccount.add(x, y)).toEqual(ScalarTAccount.add(y, x));
   });
 
   it('Identity', async () => {
-    let x = mkTransaction(a, b);
+    let x = mkScalarTAccount(a, b);
 
     expect(ScalarTAccount.add(x, ScalarTAccount.iden())).toEqual(x);
   });
 
   it('Inverse', async () => {
-    let x = mkTransaction(a, b);
+    let x = mkScalarTAccount(a, b);
 
     expect(
       ScalarTAccount.min(ScalarTAccount.add(x, ScalarTAccount.inv(x)))
@@ -62,8 +62,8 @@ describe('ScalarTAccount is a Group', () => {
   it('Reduced Form', async () => {
     let [dbt, crd] = a < b ? [0, b - a] : [a - b, 0];
 
-    expect(ScalarTAccount.min(mkTransaction(a, b))).toEqual(
-      mkTransaction(dbt, crd)
+    expect(ScalarTAccount.min(mkScalarTAccount(a, b))).toEqual(
+      mkScalarTAccount(dbt, crd)
     );
   });
 });
