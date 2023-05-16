@@ -36,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
     "eslint": "^8.7.0",
+    "eslint-plugin-mdx": "^2.1.0",
     "eslint-plugin-snarkyjs": "^0.1.0",
     "husky": "^7.0.1",
     "jest": "^27.3.1",
@@ -46,5 +47,8 @@
   },
   "peerDependencies": {
     "snarkyjs": "^0.9.1"
+  },
+  "dependencies": {
+    "fp-ts": "^2.15.0"
   }
 }
